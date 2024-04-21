@@ -7,13 +7,16 @@ import time
 def search_files(files, keywords):
     results = {}
     for file in files:
-        with file.open() as f:
-            content = f.read()
-            for keyword in keywords:
-                if keyword in content:
-                    if keyword not in results:
-                        results[keyword] = []
-                    results[keyword].append(file)
+        try:
+            with file.open() as f:
+                content = f.read()
+                for keyword in keywords:
+                    if keyword in content:
+                        if keyword not in results:
+                            results[keyword] = []
+                        results[keyword].append(file)
+        except Exception as e:
+            logging.error(f"Error reading file '{file}': {e}")
     return results
 
 # Function to divide files among threads
@@ -70,10 +73,15 @@ if __name__ == "__main__":
     # Create a lock for thread safety
     lock = threading.Lock()
     
-    # Perform parallel search
-    results = parallel_search(files, keywords, num_threads)
+    try:
+        # Perform parallel search
+        results = parallel_search(files, keywords, num_threads)
+        
+        # Output search results as a dictionary
+        print(results)
     
-    # Output search results as a dictionary
-    print(results)
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
 
     logging.debug('End program')
+
